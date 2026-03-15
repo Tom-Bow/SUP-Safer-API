@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pandas
+numpy
+scikit-fuzzy
+httpx
+requests
+scipy
+packaging
+networkx
