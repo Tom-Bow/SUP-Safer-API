@@ -155,13 +155,13 @@ def define_memberships():
     
     tide_flow['SLACK'] = fuzz.trimf(
         tide_flow.universe, 
-        [0, 0.1, 0.25]  # 0-0.25 kt (true slack tide window)
+        [0, 0.1, 0.55]  # 0-0.5 kt (true slack tide window)
     )
     # Narrow definition to capture minimal flow period only
     
     tide_flow['WEAK'] = fuzz.trimf(
         tide_flow.universe, 
-        [0.15, 0.6, 1.1]  # 0.15-1.0 kt (manageable even for beginners)
+        [0.45, 0.6, 1.1]  # 0.45-1.0 kt (manageable even for beginners)
     )
     
     tide_flow['MODERATE'] = fuzz.trimf(
