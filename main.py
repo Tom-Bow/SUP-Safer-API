@@ -11,7 +11,7 @@ from rule_base import assess_risk_from_values
 # ---------- CONFIG ---------- #
 
 MAX_AGE_MINUTES = 15  # Freshness validation window (to ensure data isnt stale)
-CACHE_TTL_SECONDS = 300  # Cache data lifetime (to ensure API's are being hit repeatadly)
+CACHE_TTL_SECONDS = 600  # Cache data lifetime (to ensure API's are being hit repeatadly)
 
 logging.basicConfig(level=logging.INFO)
 
