@@ -82,7 +82,7 @@ async def provider_open_meteo(lat,lon):
 
             await asyncio.sleep(0.2) # Test for concurrency errors
             
-            marine_res = await client.get(marine_url
+            marine_res = await client.get(marine_url)
             marine_res.raise_for_status()
 
             weather = weather_res.json()
