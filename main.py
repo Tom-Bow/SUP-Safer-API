@@ -72,12 +72,17 @@ async def provider_open_meteo(lat,lon):
             weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=mph"
             marine_url = f"https://marine-api.open-meteo.com/v1/marine?latitude={lat}&longitude={lon}&current=wind_wave_height,ocean_current_velocity,sea_surface_temperature&minutely_15=sea_level_height_msl&forecast_minutely_15=96"
 
-            weather_res, marine_res = await asyncio.gather(
-                client.get(weather_url),
-                client.get(marine_url),
-            )
+            # weather_res, marine_res = await asyncio.gather(
+            #     client.get(weather_url),
+            #     client.get(marine_url),
+            # )
 
+            weather_res = await client.get(weather_url)
             weather_res.raise_for_status()
+
+            await asyncio.sleep(0.2) # Test for concurrency errors
+            
+            marine_res = await client.get(marine_url
             marine_res.raise_for_status()
 
             weather = weather_res.json()
@@ -101,6 +106,9 @@ async def provider_open_meteo(lat,lon):
                 "water_temp": marine["current"]["sea_surface_temperature"],
                 "source": "open-meteo"
             }
+    except httpx.HTTPStatusError as e:
+        logging.error(f"Open-Meteo HTTP error: {e.response.status_code} - {e.response.tst}")
+                  
     except Exception as e:
         logging.error(f"Open-Meteo failed: {e}")
         raise
