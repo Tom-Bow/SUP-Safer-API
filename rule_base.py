@@ -320,21 +320,3 @@ def generate_risk_chart():
     
     return df
 
-# ---------- EXAMPLE USAGE ----------
-# example = compute_risk(Wind.MODERATE, Wave.CHOPPY, Tide.SLACK, Direction.OFFSHORE)
-# print(f"Computed risk: {example.name}")
-
-# # Generate chart
-# risk_df = generate_risk_chart()
-# print("\nSample of all combinations with risk:")
-# print(risk_df.head(10)) 
-
-# define_memberships()
-# risk = assess_risk_from_values(
-#     wind_v=15,   # MPH
-#     wave_v=0.9,  # meters
-#     tide_v=1.2,  # knots
-#     dir_v=50     # degrees
-# )
-
-# print(risk.name)  # e.g., "HIGH"
