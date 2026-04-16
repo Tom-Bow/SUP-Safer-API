@@ -241,6 +241,15 @@ def discretise(value, variable, enum_class):
 
 
 def assess_risk_from_values(wind_v,wave_v,tide_v,dir_v):
+    if any(v is None for v in [wind_v,wave_v,tide_v,dir_v]):
+        raise ValueError("All inputs must be provided")
+    
+    if wind_v < 0 or wave_v < 0 or tide_v < 0:
+        raise ValueError("Wind, wave and tide values must be non-negative")
+    
+    if not(0 <= dir_v <= 360):
+        raise ValueError("Wind direction must be between 0 and 360 degrees")
+    
     define_memberships()
     
     w = discretise(wind_v, wind, Wind)

@@ -3,7 +3,7 @@ import asyncio
 import logging
 import requests
 # from pytides.tide import Tide
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone, timedelta
 from rule_base import assess_risk_from_values
@@ -11,6 +11,7 @@ from rule_base import assess_risk_from_values
 # ---------- CONFIG ---------- #
 
 MAX_AGE_MINUTES = 15  # Freshness validation window (to ensure data isnt stale)
+MAX_FALLBACK_AGE_MINUTES = 30 # Provides a conservative data fallback window
 CACHE_TTL_SECONDS = 600  # Cache data lifetime (to ensure API's are being hit repeatadly)
 
 logging.basicConfig(level=logging.INFO)
@@ -34,6 +35,9 @@ app.add_middleware(
 
 def is_fresh(ts):
     return (datetime.now(timezone.utc) - ts).total_seconds() < MAX_AGE_MINUTES * 60
+
+def is_fallback_valid(ts):
+    return (datetime.now(timezone.utc) - ts).total_seconds() < MAX_FALLBACK_AGE_MINUTES * 60    
 
 def ms_to_knots(ms: float):
     return ms * 1.94384
@@ -72,11 +76,6 @@ async def provider_open_meteo(lat,lon):
             weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=mph"
             marine_url = f"https://marine-api.open-meteo.com/v1/marine?latitude={lat}&longitude={lon}&current=wind_wave_height,ocean_current_velocity,sea_surface_temperature&minutely_15=sea_level_height_msl&forecast_minutely_15=96"
 
-            # weather_res, marine_res = await asyncio.gather(
-            #     client.get(weather_url),
-            #     client.get(marine_url),
-            # )
-
             weather_res = await client.get(weather_url)
             weather_res.raise_for_status()
 
@@ -91,23 +90,19 @@ async def provider_open_meteo(lat,lon):
             logging.info(f"Weather: {weather}")
             logging.info(f"Marine: {marine}")
             
-            # tide_info = get_next_tide(marine["minutely_15"]["time"], marine["minutely_15"]["sea_level_height_msl"])
-
 
             return {
                 "requested_at": datetime.now(timezone.utc),
                 "wind": weather["current"]["wind_speed_10m"],
                 "wind_dir": convert_wind_dir(weather["current"]["wind_direction_10m"]),
                 "wave": marine["current"]["wind_wave_height"],
-                # "wave": marine["current"]["wave_height"],
                 "tide_flow": kmh_to_knots(marine["current"]["ocean_current_velocity"]),
-                # "tide_state": tide_info["tide_state"],
-                # "next_tide": tide_info["next_tide"],
                 "water_temp": marine["current"]["sea_surface_temperature"],
                 "source": "open-meteo"
             }
     except httpx.HTTPStatusError as e:
-        logging.error(f"Open-Meteo HTTP error: {e.response.status_code} - {e.response.tst}")
+        logging.error(f"Open-Meteo HTTP error: {e.response.status_code} - {e.response.text}")
+        raise
                   
     except Exception as e:
         logging.error(f"Open-Meteo failed: {e}")
@@ -162,35 +157,7 @@ PROVIDERS = [
 ]
 
 
-# def get_next_tide(tide_times, tide_heights):
-#     now = datetime.now()
-#     tide_state = None
-#     next_tide = None
-    
-#     for i in range(1, len(tide_times)):
-#         t = datetime.fromisoformat(tide_times[i])
-#         if t > now:
-#             tide_state = "Rising" if tide_heights[i] > tide_heights[i-1] else "Falling"
-#             break
-    
-#     for i in range(1, len(tide_heights) - 1):
-#         t = datetime.fromisoformat(tide_times[i])
-#         if t <= now: continue
-
-#         prev_h = tide_heights[i - 1]
-#         curr_h = tide_heights[i]
-#         next_h = tide_heights[i + 1]
-
-#         if prev_h < curr_h > next_h:
-#             next_tide = {"type": "High", "time": t, "height": curr_h}
-#             break
-
-#         if prev_h > curr_h < next_h:
-#             next_tide = {"type": "Low", "time": t, "height": curr_h}
-#             break
-        
-#     return {"tide_state": tide_state, "next_tide": next_tide}
-
+# UKHO Tidal Timings
 
 UKHO_API_KEY = "2e3dff448b674cac905400a72d9bdd9d"  # replace with your key
 BASE_URL = "https://admiraltyapi.azure-api.net/uktidalapi/api/V1"
@@ -214,27 +181,6 @@ def get_next_tide(station_id=TIDAL_STATION, forecast_days=2):
 
     now = datetime.now(timezone.utc)
 
-    # future_events = []
-    # for e in events:
-    #     event_time = datetime.fromisoformat(e["DateTime"]).replace(tzinfo=timezone.utc)
-    #     now = datetime.now(timezone.utc)
-    #     if event_time > now:
-    #         future_events.append({
-    #             "type": "High" if e["EventType"] == "HighWater" else "Low",  # High Water / Low Water
-    #             "time": event_time,
-    #             "height": e["Height"]
-    #         })
-
-    # if not future_events:
-    #     return {"tide_state": None, "next_tide": None}
-
-    # # Determine tide state (Rising/Falling)
-    # first_event = future_events[0]
-    # tide_state = "Rising" if first_event["type"] == "High Water" else "Falling"
-
-    # return {
-    #     "tide_state": tide_state,
-    #     "next_tide": first_event
     prev_event = None
     next_event = None
 
@@ -276,7 +222,11 @@ async def get_conditions(lat,lon):
     
     cached = get_cache(lat,lon)
     if cached:
-        return {**cached, "fresh": True, "cached": True}
+        return {
+            **cached, 
+            "fresh": is_fresh(cached["requested_at"]), 
+            "cached": True
+            }
     
     for provider in PROVIDERS:
         try:
@@ -285,19 +235,25 @@ async def get_conditions(lat,lon):
             if is_fresh(data["requested_at"]):
                 set_cache(lat,lon,data)
                 last_known_good = data
-                return {**data, "fresh": True, "cached": False}
+                return {
+                    **data, 
+                    "fresh": True, 
+                    "cached": False,
+                    "fallback": False
+                    }
             
         except Exception as e:
             logging.warning(f"{provider.__name__} failed: {e}")
             
-    if last_known_good:
+    if last_known_good and is_fallback_valid(last_known_good["requested_at"]):
         return {
             **last_known_good,
             "fresh": False,
+            "cached": False,
             "fallback": True
         }
         
-    raise Exception("All providers failed!")
+    raise Exception("All providers failed and no recent fallback available!")
 
 
 # ---------- ROUTES ---------- #
@@ -306,6 +262,7 @@ async def get_conditions(lat,lon):
 def health():
     return {"status": "ok"}
 
+
 @app.post("/risk")
 def calculate_risk(
     wind: float,
@@ -313,21 +270,44 @@ def calculate_risk(
     wave: float,
     tide_flow: float
 ):
-    return assess_risk_from_values(wind, wind_dir, wave, tide_flow)
+    try:
+     return assess_risk_from_values(wind, wave, tide_flow, wind_dir)
+    except ValueError as e:
+        raise HTTPException(staus_code=400, detail=str(e))
+    except Exception as e:
+        logging.exception("Risk calculation failed")
+        raise HTTPException(status_code=500, detail="Risk calculation failed")
+
 
 @app.get("/risk/from-weather")
 async def risk_from_weather(lat: float, lon: float):
-    conditions = await get_conditions(lat, lon)
+    try:
+        conditions = await get_conditions(lat, lon)
+    except Exception as e:
+        logging.exception("Failed to retrieve environmental conditions")
+        raise HTTPException(status_code=503, detail=f"Environmental data unavailable: {e}")
     
-    risk = assess_risk_from_values(
-        conditions["wind"],
-        conditions["wave"],
-        conditions["tide_flow"],
-        conditions["wind_dir"]
-        )
+    try:
+        risk = assess_risk_from_values(
+            conditions["wind"],
+            conditions["wave"],
+            conditions["tide_flow"],
+            conditions["wind_dir"]
+            )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        logging.exception("Risk calculation failed")
+        raise HTTPException(status_code=500, detail="Risk calculation failed")
     
-    
-    tide_info = get_next_tide()
+    try:
+        tide_info = get_next_tide()
+    except Exception as e:
+        logging.warning(f"Tide fetch failed: {e}")
+        tide_info= {
+            "tide_state": None,
+            "next_tide": None
+        }
 
     # Return risk + metadata
     return {
@@ -350,35 +330,25 @@ async def risk_from_weather(lat: float, lon: float):
         "tides": {
             **tide_info,
             "water_temp": conditions.get("water_temp")
-        #     {
-        #     # "tide_state": conditions.get("tide_state"),
-        #     # "next_tide": conditions.get("next_tide"),
-        #     # "tide_state": tide_info["tide_state"],
-        #     # "next_tide": tide_info["next_tide"],
-        #     # "water_temp": conditions.get("water_temp")
-        # }
         }
     }
-    
-@app.get("/compare")
-async def compare(lat: float, lon: float):
+  
+# Routes hits concurrent API limits     
+# @app.get("/compare")
+# async def compare(lat: float, lon: float):
 
-    tasks = [provider(lat, lon) for provider in PROVIDERS]
+#     tasks = [provider(lat, lon) for provider in PROVIDERS]
+#     results = await asyncio.gather(*tasks, return_exceptions=True)
+#     output = {}
 
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+#     for provider, result in zip(PROVIDERS, results):
+#         name = provider.__name__
+#         if isinstance(result, Exception):
+#             output[name] = {"error": str(result)}
+#         else:
+#             output[name] = result
 
-    output = {}
-
-    for provider, result in zip(PROVIDERS, results):
-
-        name = provider.__name__
-
-        if isinstance(result, Exception):
-            output[name] = {"error": str(result)}
-        else:
-            output[name] = result
-
-    return output
+#     return output
 
 
 @app.get("/ping")
@@ -412,10 +382,3 @@ def ping_external_api():
             "message": str(e)
         }
 
-
-"""
-"wind": 7.58,
-    "wind_dir": 243.89,
-    "wave": 0.63,
-    "tide_flow": 0.9330432,
-"""
