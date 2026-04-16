@@ -8,3 +8,4 @@ requests
 scipy
 packaging
 networkx
+pytest
