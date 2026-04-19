@@ -226,11 +226,11 @@ def cross_mf(universe):
 # ---------- ARGMAX DISCRETISATION LAYER ---------- #
 
 def discretise(value, variable, enum_class):
-    if value < variable.universe[0] or value > variable.universe[-1]:
-        raise ValueError(
-            f"Value {value} outside universe for {variable.label}: "
-            f"{variable.universe[0]} to {variable.universe[-1]}"
-        )
+    # if value < variable.universe[0] or value > variable.universe[-1]:
+    #     raise ValueError(
+    #         f"Value {value} outside universe for {variable.label}: "
+    #         f"{variable.universe[0]} to {variable.universe[-1]}"
+    #     )
     
     memberships = {
         name: fuzz.interp_membership(
