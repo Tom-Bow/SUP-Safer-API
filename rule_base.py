@@ -226,6 +226,12 @@ def cross_mf(universe):
 # ---------- ARGMAX DISCRETISATION LAYER ---------- #
 
 def discretise(value, variable, enum_class):
+    if value < variable.universe[0] or value > variable.universe[-1]:
+        raise ValueError(
+            f"Value {value} outside universe for {variable.label}: "
+            f"{variable.universe[0]} to {variable.universe[-1]}"
+        )
+    
     memberships = {
         name: fuzz.interp_membership(
             variable.universe,
@@ -294,29 +300,4 @@ def compute_risk(wind, wave, tide, direction):
         },
         "max_severity": max_sev
     }
-
-# ---------- NEW FUNCTION: GENERATE COMBINATION CHART ----------
-def generate_risk_chart():
-    all_combinations = list(product(Wind, Wave, Tide, Direction))
     
-    # Compute risk for each combination
-    rows = []
-    for w, wa, t, d in all_combinations:
-        risk = compute_risk(w, wa, t, d)
-        rows.append({
-            "Wind": w.name,
-            "Wave": wa.name,
-            "Tide": t.name,
-            "Direction": d.name,
-            "Risk": risk.name
-        })
-    
-    # Convert to pandas DataFrame for easy viewing
-    df = pd.DataFrame(rows)
-    
-    # Print risk counts
-    print("Risk counts:")
-    print(df['Risk'].value_counts())
-    
-    return df
-

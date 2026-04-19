@@ -25,6 +25,17 @@ def test_expected_risk_levels(wind, wind_dir, wave, tide_flow, expected_risk):
 
     assert result["risk"] == expected_risk
 
+@pytest.mark.parametrize("wave", [2.6, 3.0, 5.0])
+def test_wave_above_universe_is_treated_as_very_high(wave):
+    result = assess_risk_from_values(
+        0,
+        wave,
+        0,
+        0
+    )
+
+    assert result["risk"] == "VERY_HIGH"
+    assert result["components"]["wave"] == 3
 
 # -----------------------------
 # Direction component severity

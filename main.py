@@ -32,19 +32,19 @@ app.add_middleware(
 
 # ---------- UTIL ---------- #
 
-def is_fresh(ts):
+def is_fresh(ts:datetime) -> bool:
     return (datetime.now(timezone.utc) - ts).total_seconds() < MAX_AGE_MINUTES * 60
 
-def is_fallback_valid(ts):
+def is_fallback_valid(ts:datetime) -> bool:
     return (datetime.now(timezone.utc) - ts).total_seconds() < MAX_FALLBACK_AGE_MINUTES * 60    
 
-def ms_to_knots(ms: float):
+def ms_to_knots(ms: float) -> float:
     return ms * 1.94384
 
-def kmh_to_knots(kmh: float):
+def kmh_to_knots(kmh: float) -> float:
     return kmh * 0.539957
 
-def convert_wind_dir(dir: float):
+def convert_wind_dir(dir: float) -> float:
     return (dir + 180) % 360
 
 # ---------- CACHE DATA ---------- #
@@ -52,10 +52,10 @@ def convert_wind_dir(dir: float):
 cache = {}
 last_known_good = None
 
-def cache_key(lat,lon):
+def cache_key(lat:float,lon:float) -> str:
     return f"{lat}:{lon}"
 
-def get_cache(lat,lon):
+def get_cache(lat:float,lon:float):
     key = cache_key(lat,lon)
     if key in cache:
         data, ts = cache[key]
@@ -63,13 +63,13 @@ def get_cache(lat,lon):
             return data
     return None
 
-def set_cache(lat,lon,data):
+def set_cache(lat:float,lon:float,data):
     cache[cache_key(lat,lon)] = (data, datetime.now(timezone.utc))
 
 
 # ---------- ENVRIONMENTAL DATA PROVIDERS ---------- #
 
-async def provider_open_meteo(lat,lon):
+async def provider_open_meteo(lat:float,lon:float):
     try:
         async with httpx.AsyncClient(timeout=8) as client:
             weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=mph"
@@ -78,7 +78,7 @@ async def provider_open_meteo(lat,lon):
             weather_res = await client.get(weather_url)
             weather_res.raise_for_status()
 
-            await asyncio.sleep(0.2) # Test for concurrency errors
+            await asyncio.sleep(0.2) # Delay to reduce concurrency errors
             
             marine_res = await client.get(marine_url)
             marine_res.raise_for_status()
@@ -108,7 +108,7 @@ async def provider_open_meteo(lat,lon):
         raise
     
     
-async def provider_backup(lat,lon):
+async def provider_backup(lat:int,lon:int):
     try:
         async with httpx.AsyncClient(timeout=8) as client:
             url = "https://api.stormglass.io/v2/weather/point"
@@ -158,7 +158,7 @@ PROVIDERS = [
 
 # UKHO Tidal Timings
 
-UKHO_API_KEY = "2e3dff448b674cac905400a72d9bdd9d"  # replace with your key
+UKHO_API_KEY = "2e3dff448b674cac905400a72d9bdd9d"
 BASE_URL = "https://admiraltyapi.azure-api.net/uktidalapi/api/V1"
 TIDAL_STATION = "0509"  # Swansea
 
@@ -262,7 +262,7 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/risk")
+@app.get("/risk")
 def calculate_risk(
     wind: float,
     wind_dir: float,
@@ -272,7 +272,7 @@ def calculate_risk(
     try:
      return assess_risk_from_values(wind, wave, tide_flow, wind_dir)
     except ValueError as e:
-        raise HTTPException(staus_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logging.exception("Risk calculation failed")
         raise HTTPException(status_code=500, detail="Risk calculation failed")
@@ -317,7 +317,7 @@ async def risk_from_weather(lat: float, lon: float):
         "fresh": conditions.get("fresh", False),
         "cached": conditions.get("cached", False),
         "fallback": conditions.get("fallback", False),
-        # include original input values
+        # original input values
         "input": {
             "wind": conditions.get("wind"),
             "wind_dir": conditions.get("wind_dir"),
