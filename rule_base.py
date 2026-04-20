@@ -1,7 +1,5 @@
 # ---------- IMPORTS ----------
 from enum import Enum, auto
-from itertools import product
-import pandas as pd
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
@@ -37,7 +35,6 @@ class Risk(Enum):
     VERY_HIGH = auto()
     
 # ---------- INPUT MEMBERSHIP FUNCTIONS ---------- #
-
 # WIND SPEED (MPH)
 # Range: 0-30 MPH (0-26 knots)
 wind = ctrl.Antecedent(np.arange(0, 31, 1), 'wind')

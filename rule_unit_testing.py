@@ -1,5 +1,5 @@
 import pytest
-from rule_base import assess_risk_from_values
+from rule_base import assess_risk_from_values, discretise, wind, wave, wind_dir, tide_flow, Wind, Wave, Direction, Tide
 
 
 # -----------------------------
@@ -25,17 +25,31 @@ def test_expected_risk_levels(wind, wind_dir, wave, tide_flow, expected_risk):
 
     assert result["risk"] == expected_risk
 
-@pytest.mark.parametrize("wave", [2.6, 3.0, 5.0])
-def test_wave_above_universe_is_treated_as_very_high(wave):
-    result = assess_risk_from_values(
-        0,
-        wave,
-        0,
-        0
-    )
 
-    assert result["risk"] == "VERY_HIGH"
-    assert result["components"]["wave"] == 3
+@pytest.mark.parametrize("wave", [2.6, 3.0, 5.0])
+def test_wave_above_universe(wave):
+    with pytest.raises(ValueError):
+        assess_risk_from_values(
+            0,
+            wave,
+            0,
+            0
+         )
+    
+        
+@pytest.mark.parametrize(
+    "wind,wind_dir,wave,tide_flow",
+    [
+        (-1, 0.1, 0.1, 0),
+        (5, -0.1, 0.1, 0),
+        (5, 0.1, -0.1, 0),
+        (5, 0.1, 0.1, -1)
+    ]
+)
+def test_negative_inputs(wind, wind_dir, wave, tide_flow):
+    with pytest.raises(ValueError):
+        assess_risk_from_values(wind,wave,tide_flow,wind_dir)
+
 
 # -----------------------------
 # Direction component severity
@@ -62,6 +76,19 @@ def test_direction_component(direction, expected_direction_severity):
 
     assert result["components"]["direction"] == expected_direction_severity
 
+
+@pytest.mark.parametrize(
+    "wind,expected",
+    [
+        (2.0, 0),
+        (12.0, 1),
+        (19.0, 2),
+        (25.0, 3),
+    ]
+)
+def test_wind_component(wind, expected):
+    result = assess_risk_from_values(wind, 0.1, 0.1, 0)
+    assert result["components"]["wind"] == expected
 
 # -----------------------------
 # Return structure
@@ -125,3 +152,31 @@ def test_component_severities_are_valid():
     for value in components.values():
         assert isinstance(value, int)
         assert value in [0, 1, 2, 3]
+        
+
+def test_increasing_wave_does_not_reduce_risk():
+    low = assess_risk_from_values(5.0, 0.1, 0.1, 0)
+    high = assess_risk_from_values(5.0, 1.5, 0.1, 0)
+
+    assert high["max_severity"] >= low["max_severity"]
+    
+    
+@pytest.mark.parametrize(
+    "value,variable,enum_class,expected",
+    [
+        (2.0, wind, Wind, Wind.LOW),          
+        (15.0, wind, Wind, Wind.MODERATE),       
+        (25.0, wind, Wind, Wind.VERY_HIGH),   
+
+        (0.1, wave, Wave, Wave.CALM),
+        (1.5, wave, Wave, Wave.VERY_ROUGH),
+    ]
+)
+def test_discretise_returns_expected_enum(value, variable, enum_class, expected):
+    result = discretise(value, variable, enum_class)
+    assert result == expected
+    
+
+def test_discretise_returns_enum_member():
+    result = discretise(5.0, wind, Wind)
+    assert isinstance(result, Wind)

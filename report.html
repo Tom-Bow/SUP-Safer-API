@@ -439,10 +439,10 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
 }
 </script>
     <h1>report.html</h1>
-    <p>Report generated on 19-Apr-2026 at 15:02:02 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.2.0</p>
+    <p>Report generated on 19-Apr-2026 at 16:27:19 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.2.0</p>
     <h2>Summary</h2>
-    <p>21 tests ran in 1.92 seconds. </p>
-    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">18 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">3 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <p>36 tests ran in 1.80 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">36 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
     <h2>Results</h2>
     <table id="results-table">
       <thead id="results-table-head">
@@ -453,33 +453,6 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
           <th class="sortable links" col="links">Links</th></tr>
         <tr hidden="true" id="not-found-message">
           <th colspan="4">No results found. Try to check the filters</th></tr></thead>
-      <tbody class="failed results-table-row">
-        <tr>
-          <td class="col-result">Failed</td>
-          <td class="col-name">rule_unit_testing.py::test_wave_above_universe_is_treated_as_very_high[2.6]</td>
-          <td class="col-duration">0.00</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log">wave = 2.6<br/><br/>    @pytest.mark.parametrize(&quot;wave&quot;, [2.6, 3.0, 5.0])<br/>    def test_wave_above_universe_is_treated_as_very_high(wave):<br/>        result = assess_risk_from_values(<br/>            0,<br/>            wave,<br/>            0,<br/>&gt;           0<br/>        )<br/><br/>rule_unit_testing.py:34: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/>rule_base.py:262: in assess_risk_from_values<br/>    wa = discretise(wave_v, wave, Wave)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/><br/>value = 2.6, variable = Antecedent: wave, enum_class = &lt;enum &#x27;Wave&#x27;&gt;<br/><br/>    def discretise(value, variable, enum_class):<br/>        if value &lt; variable.universe[0] or value &gt; variable.universe[-1]:<br/>            raise ValueError(<br/>&gt;               f&quot;Value {value} outside universe for {variable.label}: &quot;<br/>                f&quot;{variable.universe[0]} to {variable.universe[-1]}&quot;<br/>            )<br/><span class="error">E           ValueError: Value 2.6 outside universe for wave: 0.0 to 2.4000000000000004</span><br/><br/>rule_base.py:231: ValueError<br/></div></td></tr></tbody>
-      <tbody class="failed results-table-row">
-        <tr>
-          <td class="col-result">Failed</td>
-          <td class="col-name">rule_unit_testing.py::test_wave_above_universe_is_treated_as_very_high[3.0]</td>
-          <td class="col-duration">0.00</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log">wave = 3.0<br/><br/>    @pytest.mark.parametrize(&quot;wave&quot;, [2.6, 3.0, 5.0])<br/>    def test_wave_above_universe_is_treated_as_very_high(wave):<br/>        result = assess_risk_from_values(<br/>            0,<br/>            wave,<br/>            0,<br/>&gt;           0<br/>        )<br/><br/>rule_unit_testing.py:34: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/>rule_base.py:262: in assess_risk_from_values<br/>    wa = discretise(wave_v, wave, Wave)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/><br/>value = 3.0, variable = Antecedent: wave, enum_class = &lt;enum &#x27;Wave&#x27;&gt;<br/><br/>    def discretise(value, variable, enum_class):<br/>        if value &lt; variable.universe[0] or value &gt; variable.universe[-1]:<br/>            raise ValueError(<br/>&gt;               f&quot;Value {value} outside universe for {variable.label}: &quot;<br/>                f&quot;{variable.universe[0]} to {variable.universe[-1]}&quot;<br/>            )<br/><span class="error">E           ValueError: Value 3.0 outside universe for wave: 0.0 to 2.4000000000000004</span><br/><br/>rule_base.py:231: ValueError<br/></div></td></tr></tbody>
-      <tbody class="failed results-table-row">
-        <tr>
-          <td class="col-result">Failed</td>
-          <td class="col-name">rule_unit_testing.py::test_wave_above_universe_is_treated_as_very_high[5.0]</td>
-          <td class="col-duration">0.00</td>
-          <td class="col-links"></td></tr>
-        <tr>
-          <td class="extra" colspan="4">
-            <div class="log">wave = 5.0<br/><br/>    @pytest.mark.parametrize(&quot;wave&quot;, [2.6, 3.0, 5.0])<br/>    def test_wave_above_universe_is_treated_as_very_high(wave):<br/>        result = assess_risk_from_values(<br/>            0,<br/>            wave,<br/>            0,<br/>&gt;           0<br/>        )<br/><br/>rule_unit_testing.py:34: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/>rule_base.py:262: in assess_risk_from_values<br/>    wa = discretise(wave_v, wave, Wave)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/><br/>value = 5.0, variable = Antecedent: wave, enum_class = &lt;enum &#x27;Wave&#x27;&gt;<br/><br/>    def discretise(value, variable, enum_class):<br/>        if value &lt; variable.universe[0] or value &gt; variable.universe[-1]:<br/>            raise ValueError(<br/>&gt;               f&quot;Value {value} outside universe for {variable.label}: &quot;<br/>                f&quot;{variable.universe[0]} to {variable.universe[-1]}&quot;<br/>            )<br/><span class="error">E           ValueError: Value 5.0 outside universe for wave: 0.0 to 2.4000000000000004</span><br/><br/>rule_base.py:231: ValueError<br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
@@ -520,6 +493,69 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">rule_unit_testing.py::test_expected_risk_levels[5.0-300-0.1-0.1-LOW]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_wave_above_universe[2.6]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_wave_above_universe[3.0]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_wave_above_universe[5.0]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_negative_inputs[-1-0.1-0.1-0]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_negative_inputs[5--0.1-0.1-0]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_negative_inputs[5-0.1--0.1-0]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_negative_inputs[5-0.1-0.1--1]</td>
           <td class="col-duration">0.00</td>
           <td class="col-links"></td></tr>
         <tr>
@@ -591,6 +627,42 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_wind_component[2.0-0]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_wind_component[12.0-1]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_wind_component[19.0-2]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_wind_component[25.0-3]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
           <td class="col-name">rule_unit_testing.py::test_return_structure</td>
           <td class="col-duration">0.00</td>
           <td class="col-links"></td></tr>
@@ -637,6 +709,69 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">rule_unit_testing.py::test_component_severities_are_valid</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_increasing_wave_does_not_reduce_risk</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_discretise_returns_expected_enum[2.0-Antecedent-Wind-Wind.LOW]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_discretise_returns_expected_enum[15.0-Antecedent-Wind-Wind.MODERATE]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_discretise_returns_expected_enum[25.0-Antecedent-Wind-Wind.VERY_HIGH]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_discretise_returns_expected_enum[0.1-Antecedent-Wave-Wave.CALM]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_discretise_returns_expected_enum[1.5-Antecedent-Wave-Wave.VERY_ROUGH]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">rule_unit_testing.py::test_discretise_returns_enum_member</td>
           <td class="col-duration">0.00</td>
           <td class="col-links"></td></tr>
         <tr>

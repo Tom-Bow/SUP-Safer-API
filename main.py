@@ -1,7 +1,6 @@
 import httpx
 import asyncio
 import logging
-import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone, timedelta
@@ -22,7 +21,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Allow React later
+# React Interaction (API CALL)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -108,7 +107,7 @@ async def provider_open_meteo(lat:float,lon:float):
         raise
     
     
-async def provider_backup(lat:int,lon:int):
+async def provider_backup(lat:float,lon:float):
     try:
         async with httpx.AsyncClient(timeout=8) as client:
             url = "https://api.stormglass.io/v2/weather/point"
@@ -162,18 +161,19 @@ UKHO_API_KEY = "2e3dff448b674cac905400a72d9bdd9d"
 BASE_URL = "https://admiraltyapi.azure-api.net/uktidalapi/api/V1"
 TIDAL_STATION = "0509"  # Swansea
 
-def get_next_tide(station_id=TIDAL_STATION, forecast_days=2):
+async def get_next_tide(station_id=TIDAL_STATION, forecast_days=2):
     headers = {
         "Ocp-Apim-Subscription-Key": UKHO_API_KEY,
         "Accept": "application/json"
     }
-
-    # Get tidal events for the station
     url = f"{BASE_URL}/Stations/{station_id}/TidalEvents"
     params = {"duration": forecast_days}
-    resp = requests.get(url, headers=headers, params=params)
-    resp.raise_for_status()
-    events = resp.json()
+    
+    # Get tidal events for the station
+    async with httpx.AsyncClient(timeout=8) as client:
+        resp = await client.get(url, headers=headers, params=params)
+        resp.raise_for_status()
+        events = resp.json()
 
     if not events:
         return {"tide_state": None, "next_tide": None}
@@ -300,7 +300,7 @@ async def risk_from_weather(lat: float, lon: float):
         raise HTTPException(status_code=500, detail="Risk calculation failed")
     
     try:
-        tide_info = get_next_tide()
+        tide_info = await get_next_tide()
     except Exception as e:
         logging.warning(f"Tide fetch failed: {e}")
         tide_info= {
@@ -351,19 +351,18 @@ async def risk_from_weather(lat: float, lon: float):
 
 
 @app.get("/ping")
-def ping_external_api():
+async def ping_external_api():
     """
     Check if Open-Meteo (Weather and Marine) is reachable.
     """
     try:
-        w = requests.get(
-            "https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0",
-            timeout=5
-        )
-        m = requests.get(
-            "https://marine-api.open-meteo.com/v1/marine?latitude=0&longitude=0",
-            timeout=5
-        )
+        async with httpx.AsyncClient(timeout=5) as client:
+            w = await client.get(
+                "https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0"
+            )
+            m = await client.get(
+                "https://marine-api.open-meteo.com/v1/marine?latitude=0&longitude=0"
+            )
 
         return {
             "status": "ok" if w.status_code == 200 and m.status_code == 200 else "warning",
