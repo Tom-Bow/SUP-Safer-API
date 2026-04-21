@@ -274,7 +274,7 @@ def calculate_risk(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logging.exception("Risk calculation failed")
+        logging.exception(f"Risk calculation failed: {e}")
         raise HTTPException(status_code=500, detail="Risk calculation failed")
 
 
