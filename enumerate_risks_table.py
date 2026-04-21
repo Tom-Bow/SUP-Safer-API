@@ -2,7 +2,7 @@ import pandas as pd
 from itertools import product
 from rule_base import Wind, Wave, Tide, Direction, compute_risk
 
-def generate_risk_chart():
+def enumerate_risks_table():
     all_combinations = list(product(Wind, Wave, Tide, Direction))
     
     # Compute risk for each combination
@@ -26,7 +26,7 @@ def generate_risk_chart():
     
     return df
 
-def export_to_html(df, filename="risk_table.html"):
+def export_to_html(df, filename="enumerated_risk_table.html"):
     
     def colour_risk(val):
         if val == "LOW":
@@ -76,11 +76,11 @@ def export_to_html(df, filename="risk_table.html"):
 
 
 if __name__ == "__main__":
-    df = generate_risk_chart()
+    df = enumerate_risks_table()
     try:
         export_to_html(df)
-    except:
-        print("TABLE NOT CREATED")
+    except Exception as e:
+        print(f"ERROR! TABLE NOT CREATED: {e}")
     finally:
         print("TABLE SUCCESSFULLY CREATED")
     print(df.head())
