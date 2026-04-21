@@ -298,7 +298,7 @@ async def risk_from_weather(lat: float, lon: float):
     except Exception:
         logging.exception("Risk calculation failed")
         raise HTTPException(status_code=500, detail="Risk calculation failed")
-    
+    # Tide data is optional
     try:
         tide_info = await get_next_tide()
     except Exception as e:

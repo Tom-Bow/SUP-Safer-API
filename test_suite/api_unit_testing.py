@@ -20,11 +20,11 @@ def test_health_route():
 # Manual risk endpoint
 # -----------------------------
 def test_manual_risk_route():
-    response = client.post(
+    response = client.get(
         "/risk",
         params={
             "wind": 10.0,
-            "wind_dir": 300,
+            "wind_dir": 10,
             "wave": 0.2,
             "tide_flow": 0.3
         }
@@ -56,7 +56,7 @@ def test_risk_from_weather_success(monkeypatch):
             "water_temp": 10.4
         }
 
-    def mock_get_next_tide():
+    async def mock_get_next_tide():
         return {
             "tide_state": "Rising",
             "next_tide": {
@@ -112,7 +112,7 @@ def test_risk_from_weather_cached(monkeypatch):
             "water_temp": 10.4
         }
 
-    def mock_get_next_tide():
+    async def mock_get_next_tide():
         return {
             "tide_state": "Rising",
             "next_tide": {
@@ -153,7 +153,7 @@ def test_risk_from_weather_fallback(monkeypatch):
             "water_temp": 10.1
         }
 
-    def mock_get_next_tide():
+    async def mock_get_next_tide():
         return {
             "tide_state": "Falling",
             "next_tide": {
@@ -188,7 +188,7 @@ def test_risk_from_weather_failure(monkeypatch):
 
     response = client.get("/risk/from-weather?lat=51.61&lon=-3.98")
 
-    assert response.status_code == 500
+    assert response.status_code == 503 # Service Unavailable
 
 
 # -----------------------------
@@ -209,7 +209,7 @@ def test_risk_from_weather_tide_failure(monkeypatch):
             "water_temp": 10.4
         }
 
-    def mock_get_next_tide():
+    async def mock_get_next_tide():
         raise Exception("UKHO unavailable")
 
     monkeypatch.setattr(main, "get_conditions", mock_get_conditions)
@@ -217,4 +217,9 @@ def test_risk_from_weather_tide_failure(monkeypatch):
 
     response = client.get("/risk/from-weather?lat=51.61&lon=-3.98")
 
-    assert response.status_code == 500
+    assert response.status_code == 200
+    #but
+    body = response.json()
+    assert body["risk"] is not None
+    assert body["tides"]["tide_state"] is None
+    assert body["tides"]["next_tide"] is None

@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8"/>
-    <title>report.html</title>
+    <title>integration_report.html</title>
     <style>body {
   font-family: Helvetica, Arial, sans-serif;
   font-size: 12px;
@@ -438,10 +438,10 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
     notFoundMessage.hidden = !allRowsHidden;
 }
 </script>
-    <h1>report.html</h1>
-    <p>Report generated on 20-Apr-2026 at 18:15:00 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.2.0</p>
+    <h1>integration_report.html</h1>
+    <p>Report generated on 21-Apr-2026 at 09:48:36 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.2.0</p>
     <h2>Summary</h2>
-    <p>4 tests ran in 3.89 seconds. </p>
+    <p>4 tests ran in 8.81 seconds. </p>
     <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">4 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
     <h2>Results</h2>
     <table id="results-table">
@@ -456,8 +456,8 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
-          <td class="col-name">integration_testing.py::test_full_integration_live</td>
-          <td class="col-duration">1.11</td>
+          <td class="col-name">test_suite/integration_testing.py::test_full_integration_live</td>
+          <td class="col-duration">2.15</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -465,8 +465,8 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
-          <td class="col-name">integration_testing.py::test_cache_behaviour</td>
-          <td class="col-duration">1.01</td>
+          <td class="col-name">test_suite/integration_testing.py::test_cache_behaviour</td>
+          <td class="col-duration">1.36</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -474,7 +474,7 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
-          <td class="col-name">integration_testing.py::test_tide_failure_integration</td>
+          <td class="col-name">test_suite/integration_testing.py::test_tide_failure_integration</td>
           <td class="col-duration">0.00</td>
           <td class="col-links"></td></tr>
         <tr>
@@ -483,8 +483,8 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
-          <td class="col-name">integration_testing.py::test_environmental_data_failure</td>
-          <td class="col-duration">0.00</td>
+          <td class="col-name">test_suite/integration_testing.py::test_environmental_data_failure</td>
+          <td class="col-duration">0.01</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
@@ -492,6 +492,6 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
 Traceback (most recent call last):
   File &quot;C:\Users\Thomas\Downloads\swansea-conditions-tool\main.py&quot;, line 284, in risk_from_weather
     conditions = await get_conditions(lat, lon)
-  File &quot;C:\Users\Thomas\Downloads\swansea-conditions-tool\integration_testing.py&quot;, line 49, in mock_get_conditions
+  File &quot;C:\Users\Thomas\Downloads\swansea-conditions-tool\test_suite\integration_testing.py&quot;, line 49, in mock_get_conditions
     raise Exception(&quot;All providers failed&quot;)
 Exception: All providers failed<br/></div></td></tr></tbody></table></body></html>
