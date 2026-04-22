@@ -17,7 +17,8 @@ logging.basicConfig(level=logging.INFO)
 # ---------- APP ---------- #
 
 app = FastAPI(
-    title="Paddleboard Risk API",
+    title="SUP Safer API",
+    description="API for retrieving environmental conditions and generating paddleboarding risk classifications",
     version="1.0.0"
 )
 
@@ -71,8 +72,18 @@ def set_cache(lat:float,lon:float,data):
 async def provider_open_meteo(lat:float,lon:float):
     try:
         async with httpx.AsyncClient(timeout=8) as client:
-            weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=mph"
-            marine_url = f"https://marine-api.open-meteo.com/v1/marine?latitude={lat}&longitude={lon}&current=wind_wave_height,ocean_current_velocity,sea_surface_temperature&minutely_15=sea_level_height_msl&forecast_minutely_15=96"
+            weather_url = (
+                "https://api.open-meteo.com/v1/forecast"
+                f"?latitude={lat}&longitude={lon}"
+                "&current=wind_speed_10m,wind_direction_10m"
+                "&wind_speed_unit=mph"
+            )
+            marine_url = (
+                "https://marine-api.open-meteo.com/v1/marine"
+                f"?latitude={lat}&longitude={lon}"
+                "&current=wind_wave_height,ocean_current_velocity,sea_surface_temperature"
+                "&minutely_15=sea_level_height_msl&forecast_minutely_15=96"
+            )
 
             weather_res = await client.get(weather_url)
             weather_res.raise_for_status()
@@ -138,7 +149,7 @@ async def provider_backup(lat:float,lon:float):
 
             return {
             "requested_at": datetime.now(timezone.utc),
-            "wind": current["windSpeed"]["sg"],  # m/s → mph
+            "wind": current["windSpeed"]["sg"],
             "wind_dir": convert_wind_dir(current["windDirection"]["sg"]),
             "wave": current["windWaveHeight"]["sg"],
             "tide_flow": ms_to_knots(current["currentSpeed"]["sg"]),
@@ -156,7 +167,6 @@ PROVIDERS = [
 
 
 # UKHO Tidal Timings
-
 UKHO_API_KEY = "2e3dff448b674cac905400a72d9bdd9d"
 BASE_URL = "https://admiraltyapi.azure-api.net/uktidalapi/api/V1"
 TIDAL_STATION = "0509"  # Swansea
@@ -262,7 +272,17 @@ def health():
     return {"status": "ok"}
 
 
-@app.get("/risk")
+@app.get(
+    "/risk",
+    summary="Get risk classification from manual environmental input values",
+    description="Returns a risk classification from the condition attribute inputs supplied. This endpoint bypasses external data sources",
+    responses={
+        200: {"description": "Risk classification successfully generated"},
+        400: {"description": "Invalid input values"},
+        500: {"description": "Risk calculation failed due to unexpected server error"}
+    },
+    tags=["Risk Classification"]
+)
 def calculate_risk(
     wind: float,
     wind_dir: float,
@@ -278,7 +298,18 @@ def calculate_risk(
         raise HTTPException(status_code=500, detail="Risk calculation failed")
 
 
-@app.get("/risk/from-weather")
+@app.get(
+    "/risk/from-weather",
+    summary="Get risk classification from live environmental data sources",
+    description="Retrieves current environmental conditions for specified latitude-longitude and returns a risk classification",
+    responses={
+        200: {"description": "Risk classification successfully generated"},
+        400: {"description": "Invalid latitude and/or longitude provided"},
+        400: {"description": "Unable to retrieve environmental data from external sources"},
+        500: {"description": "Risk calculation failed due to unexpected server error"}
+    },
+    tags=["Risk Classification"]
+)
 async def risk_from_weather(lat: float, lon: float):
     try:
         conditions = await get_conditions(lat, lon)
@@ -350,7 +381,12 @@ async def risk_from_weather(lat: float, lon: float):
 #     return output
 
 
-@app.get("/ping")
+@app.get(
+    "/ping",
+    summary="Health check endpoint",
+    description="Returns a simple response to confirm the API is running",
+    tags=["System"]    
+)
 async def ping_external_api():
     """
     Check if Open-Meteo (Weather and Marine) is reachable.
