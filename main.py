@@ -15,10 +15,40 @@ CACHE_TTL_SECONDS = 600  # Cache data lifetime (to ensure API's are being hit re
 logging.basicConfig(level=logging.INFO)
 
 # ---------- APP ---------- #
+description = """
+SUP Safer API provides risk classifications for stand-up paddleboarding conditions.
+
+## Risk Classification
+
+You can:
+
+- **Generate a risk classification from live environmental data** using `/risk/from-weather`.
+
+- **Generate a risk classification from manual inputs** using `/risk`.
+
+## Data Sources
+
+The API retrieves environmental data from external weather and marine providers.
+Multiple providers are used to improve reliability through fallback mechanisms.
+
+## System Endpoints
+
+- `/` — View basic API information.
+
+- `/ping` — Check if the API is running.
+
+## Notes
+
+- This system is a research prototype. Do not replace professional judgement with the output of this data source.
+"""
 
 app = FastAPI(
     title="SUP Safer API",
-    description="API for retrieving environmental conditions and generating paddleboarding risk classifications",
+    description=description,
+    contact={
+        "name": "Thomas Bowden",
+        "email": "962971@swansea.ac.uk"
+    },
     version="1.0.0"
 )
 
@@ -267,7 +297,12 @@ async def get_conditions(lat,lon):
 
 # ---------- ROUTES ---------- #
             
-@app.get("/")
+@app.get(
+    "/",
+    summary="Health check",
+    description="Returns a simple response to confirm the API is running.",
+    tags=["System"]
+)
 def health():
     return {"status": "ok"}
 
@@ -383,8 +418,8 @@ async def risk_from_weather(lat: float, lon: float):
 
 @app.get(
     "/ping",
-    summary="Health check endpoint",
-    description="Returns a simple response to confirm the API is running",
+    summary="External source health check",
+    description="Returns a simple response to confirm the API is running and that primary data source is reachable",
     tags=["System"]    
 )
 async def ping_external_api():
