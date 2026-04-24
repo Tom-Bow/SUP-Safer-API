@@ -4,7 +4,11 @@ import main
 
 client = TestClient(app)
 
-# Full integration test
+# ------------------------------------------------------------
+# Full end-to-end integration
+# ------------------------------------------------------------
+# Verifies that the complete /risk/from-weather pipeline returns
+# a valid response when executed against the live integrated system.
 def test_full_integration_live():
     response = client.get("/risk/from-weather?lat=51.61&lon=-3.98")
 
@@ -17,7 +21,11 @@ def test_full_integration_live():
     assert "tides" in data
     
     
-# Cache integration test
+# ------------------------------------------------------------
+# Cache integration behaviour
+# ------------------------------------------------------------
+# Verifies that repeated requests for the same coordinates trigger
+# cache reuse, with the second response marked as cached.
 def test_cache_behaviour():
     main.cache.clear()
 
@@ -30,7 +38,11 @@ def test_cache_behaviour():
     assert second["cached"] is True
     
     
-# Partial failure
+# ------------------------------------------------------------
+# Partial failure tolerance
+# ------------------------------------------------------------
+# Verifies that failure in the supplementary tide retrieval stage
+# does not prevent the system from returning the core classification.
 def test_tide_failure_integration(monkeypatch):
     async def mock_get_next_tide():
         raise Exception("fail")
@@ -43,7 +55,11 @@ def test_tide_failure_integration(monkeypatch):
     assert response.json()["tides"]["tide_state"] is None
     
 
-# Failure to get environmental data
+# ------------------------------------------------------------
+# Full environmental data failure
+# ------------------------------------------------------------
+# Verifies that failure to retrieve environmental conditions across
+# the integrated pipeline results in an appropriate 503 response.
 def test_environmental_data_failure(monkeypatch):
     async def mock_get_conditions(lat, lon):
         raise Exception("All providers failed")

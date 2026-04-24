@@ -2,13 +2,13 @@ from fastapi.testclient import TestClient
 from main import app
 import main
 
-
 client = TestClient(app)
 
-
-# -----------------------------
+# ------------------------------------------------------------
 # Basic route tests
-# -----------------------------
+# ------------------------------------------------------------
+# Verifies that the root/health endpoint responds successfully
+# and returns the expected API status payload.
 def test_health_route():
     response = client.get("/")
 
@@ -16,9 +16,11 @@ def test_health_route():
     assert response.json() == {"status": "ok"}
 
 
-# -----------------------------
+# ------------------------------------------------------------
 # Manual risk endpoint
-# -----------------------------
+# ------------------------------------------------------------
+# Verifies that the manual classification endpoint accepts valid
+# query parameters and returns the expected response structure.
 def test_manual_risk_route():
     response = client.get(
         "/risk",
@@ -38,9 +40,11 @@ def test_manual_risk_route():
     assert "max_severity" in data
 
 
-# -----------------------------
+# ------------------------------------------------------------
 # /risk/from-weather success case
-# -----------------------------
+# ------------------------------------------------------------
+# Verifies that the weather-driven endpoint returns a complete
+# response when environmental and tidal data are successfully retrieved.
 def test_risk_from_weather_success(monkeypatch):
     async def mock_get_conditions(lat, lon):
         return {
@@ -94,9 +98,11 @@ def test_risk_from_weather_success(monkeypatch):
     assert data["tides"]["next_tide"]["type"] == "High"
 
 
-# -----------------------------
+# ------------------------------------------------------------
 # Cached response case
-# -----------------------------
+# ------------------------------------------------------------
+# Verifies that cached data is correctly identified within the
+# API response metadata without breaking endpoint behaviour.
 def test_risk_from_weather_cached(monkeypatch):
     async def mock_get_conditions(lat, lon):
         return {
@@ -135,9 +141,11 @@ def test_risk_from_weather_cached(monkeypatch):
     assert data["fallback"] is False
 
 
-# -----------------------------
+# ------------------------------------------------------------
 # Fallback response case
-# -----------------------------
+# ------------------------------------------------------------
+# Verifies that fallback data is surfaced correctly when a
+# degraded-but-usable response is returned by the backend.
 def test_risk_from_weather_fallback(monkeypatch):
     async def mock_get_conditions(lat, lon):
         return {
@@ -177,9 +185,11 @@ def test_risk_from_weather_fallback(monkeypatch):
     assert data["tides"]["tide_state"] == "Falling"
 
 
-# -----------------------------
-# Failure case when get_conditions fails
-# -----------------------------
+# ------------------------------------------------------------
+# Failure case when environmental retrieval fails
+# ------------------------------------------------------------
+# Verifies that a complete failure to obtain environmental data
+# is communicated through an appropriate 503 response.
 def test_risk_from_weather_failure(monkeypatch):
     async def mock_get_conditions(lat, lon):
         raise Exception("All providers failed!")
@@ -191,9 +201,11 @@ def test_risk_from_weather_failure(monkeypatch):
     assert response.status_code == 503 # Service Unavailable
 
 
-# -----------------------------
-# Failure case when tide fetch fails
-# -----------------------------
+# ------------------------------------------------------------
+# Partial failure when tide data is unavailable
+# ------------------------------------------------------------
+# Verifies that failure to retrieve supplementary tidal data does
+# not prevent the endpoint from returning the core risk classification.
 def test_risk_from_weather_tide_failure(monkeypatch):
     async def mock_get_conditions(lat, lon):
         return {
@@ -218,7 +230,6 @@ def test_risk_from_weather_tide_failure(monkeypatch):
     response = client.get("/risk/from-weather?lat=51.61&lon=-3.98")
 
     assert response.status_code == 200
-    #but
     body = response.json()
     assert body["risk"] is not None
     assert body["tides"]["tide_state"] is None

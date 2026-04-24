@@ -2,9 +2,11 @@ import pytest
 from rule_base import assess_risk_from_values, discretise, wind, wave, wind_dir, tide_flow, Wind, Wave, Direction, Tide
 
 
-# -----------------------------
+# ------------------------------------------------------------
 # Overall risk classification
-# -----------------------------
+# ------------------------------------------------------------
+# Verifies that representative combinations of environmental
+# inputs produce the expected overall risk classification.
 @pytest.mark.parametrize(
     "wind,wind_dir,wave,tide_flow,expected_risk",
     [
@@ -25,7 +27,8 @@ def test_expected_risk_levels(wind, wind_dir, wave, tide_flow, expected_risk):
 
     assert result["risk"] == expected_risk
 
-
+# Verifies that wave heights outside the supported fuzzy universe
+# are rejected rather than incorrectly discretised.
 @pytest.mark.parametrize("wave", [2.6, 3.0, 5.0])
 def test_wave_above_universe(wave):
     with pytest.raises(ValueError):
@@ -36,7 +39,8 @@ def test_wave_above_universe(wave):
             0
          )
     
-        
+# Verifies that physically invalid negative inputs are rejected
+# before they enter the classification pipeline. 
 @pytest.mark.parametrize(
     "wind,wind_dir,wave,tide_flow",
     [
@@ -51,9 +55,11 @@ def test_negative_inputs(wind, wind_dir, wave, tide_flow):
         assess_risk_from_values(wind,wave,tide_flow,wind_dir)
 
 
-# -----------------------------
-# Direction component severity
-# -----------------------------
+# ------------------------------------------------------------
+# Component severity checks
+# ------------------------------------------------------------
+# Verifies that wind direction is mapped to the expected severity
+# category for representative onshore, cross-shore, and offshore bearings.
 @pytest.mark.parametrize(
     "direction,expected_direction_severity",
     [
@@ -76,7 +82,8 @@ def test_direction_component(direction, expected_direction_severity):
 
     assert result["components"]["direction"] == expected_direction_severity
 
-
+# Verifies that increasing wind values are discretised into the
+# expected ordinal severity levels.
 @pytest.mark.parametrize(
     "wind,expected",
     [
@@ -90,9 +97,11 @@ def test_wind_component(wind, expected):
     result = assess_risk_from_values(wind, 0.1, 0.1, 0)
     assert result["components"]["wind"] == expected
 
-# -----------------------------
-# Return structure
-# -----------------------------
+# ------------------------------------------------------------
+# Output structure and consistency
+# ------------------------------------------------------------
+# Verifies that the returned result has the expected structure
+# required by downstream API and frontend consumers.
 def test_return_structure():
     result = assess_risk_from_values(
         8.0,
@@ -112,9 +121,8 @@ def test_return_structure():
         assert key in result["components"]
 
 
-# -----------------------------
-# Max severity matches risk
-# -----------------------------
+# Verifies that the reported overall risk remains consistent with
+# the maximum component severity used by the decision rule.
 @pytest.mark.parametrize(
     "wind,wind_dir,wave,tide_flow,expected_max_severity,expected_risk",
     [
@@ -136,9 +144,8 @@ def test_max_severity_and_risk(wind, wind_dir, wave, tide_flow, expected_max_sev
     assert result["risk"] == expected_risk
 
 
-# -----------------------------
-# Component values are integers in valid range
-# -----------------------------
+# Verifies that each component severity is returned as an integer
+# within the supported ordinal range 0-3.
 def test_component_severities_are_valid():
     result = assess_risk_from_values(
         15.0,
@@ -153,14 +160,19 @@ def test_component_severities_are_valid():
         assert isinstance(value, int)
         assert value in [0, 1, 2, 3]
         
-
+# Verifies a basic monotonicity property: increasing wave severity
+# should not reduce the resulting maximum severity.
 def test_increasing_wave_does_not_reduce_risk():
     low = assess_risk_from_values(5.0, 0.1, 0.1, 0)
     high = assess_risk_from_values(5.0, 1.5, 0.1, 0)
 
     assert high["max_severity"] >= low["max_severity"]
     
-    
+# ------------------------------------------------------------
+# Discretisation behaviour
+# ------------------------------------------------------------
+# Verifies that representative continuous inputs are discretised
+# into the expected enum categories. 
 @pytest.mark.parametrize(
     "value,variable,enum_class,expected",
     [
@@ -176,7 +188,8 @@ def test_discretise_returns_expected_enum(value, variable, enum_class, expected)
     result = discretise(value, variable, enum_class)
     assert result == expected
     
-
+# Verifies that discretisation returns a member of the correct enum
+# rather than a raw string or numeric value.
 def test_discretise_returns_enum_member():
     result = discretise(5.0, wind, Wind)
     assert isinstance(result, Wind)
