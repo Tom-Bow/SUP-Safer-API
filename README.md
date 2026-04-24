@@ -1,45 +1,76 @@
-# Paddleboard Risk API
+# SUP Safer API
 
 A backend service that retrieves real-time environmental conditions and classifies paddleboarding risk using a rule-based model.
 
 ## Overview
 
-This API aggregates weather and marine data to generate a simplified risk classification (LOW → VERY HIGH) for paddleboarding conditions.
+SUP Safer API aggregates weather and marine data to generate a simplified paddleboarding risk classification, from **LOW** to **VERY HIGH**.
 
-### It is designed for:
+It is designed for:
 
-novice paddlers
-quick decision-making
-usability-focused research (not for real-world safety reliance)
-⚙️ Architecture
-Data Flow
+- Novice paddlers.
+- Quick decision-making.
+- Usability-focused research, not real-world safety reliance.
 
+## Setup
+
+### Requirements
+- Python 3.x / Node.js xx
+- Internet connection for external API calls
+
+### Install
+- pip install -r requirements.txt
+- npm install
+
+### Run
+- uvicorn main:app --reload
+- npm run dev
+
+### Notes
+- The frontend expects the backend to run on ...
+- If API keys are required, copy `.env.example` to `.env`
+- This project was developed for dissertation submission and is intended for demonstration/research use
+
+## Architecture
+
+### Data flow
+
+```text
 Request → Cache Check → Data Providers → Risk Engine → Response
+```
 
-Client Request
-/risk/from-weather?lat=...&lon=...
-Cache Layer
-Prevents unnecessary API calls using TTL-based freshness
-Data Providers
-Primary: Open-Meteo
-Fallback: Stormglass
-Risk Engine
-Rule-based classification using environmental thresholds
-Response
-Returns risk level and contributing factors
-🌐 Endpoints
-GET /risk/from-weather
+### Components
+
+- **Client request**  
+  `/risk/from-weather?lat=...&lon=...`
+
+- **Cache layer**  
+  Prevents unnecessary API calls using TTL-based freshness.
+
+- **Data providers**  
+  Primary: Open-Meteo  
+  Fallback: Stormglass
+
+- **Risk engine**  
+  Rule-based classification using environmental thresholds.
+
+- **Response**  
+  Returns a risk level and contributing factors.
+
+## Endpoints
+
+### `GET /risk/from-weather`
 
 Fetch environmental data and compute risk.
 
-Query Parameters:
+#### Query parameters
 
-lat (float)
-lon (float)
+- `lat` (`float`)
+- `lon` (`float`)
 
-Example Response:
+#### Example response
 
-```
+```json
 {
   "risk": "low",
   "component_risk": {},
@@ -48,11 +79,11 @@ Example Response:
   "cached": false,
   "fallback": false,
   "input": {
-  "wind": 9.6,
-  "wind_dir": 338,
-  "wave": 0.3,
-  "tide_flow": 0.43,
-  "requested_at": "2026-04-14T21:57:09Z"
+    "wind": 9.6,
+    "wind_dir": 338,
+    "wave": 0.3,
+    "tide_flow": 0.43,
+    "requested_at": "2026-04-14T21:57:09Z"
   },
   "tides": {
     "tide_state": "Rising",
@@ -66,124 +97,142 @@ Example Response:
 }
 ```
 
-`POST /risk`
+### `POST /risk`
 
-Manually calculate risk from provided inputs.
+Manually calculate risk from provided environmental inputs.
 
-`GET /compare`
+### `GET /compare`
 
-Compare all data providers (debug/testing only).
+Compare all data providers.  
+**Intended for debug and testing only.**
 
-`GET /ping`
+### `GET /ping`
 
 Basic API health check.
 
-📡 Data Providers
-Open-Meteo (Primary)
+## Data Providers
+
+### Open-Meteo (Primary)
 
 Provides:
 
-Wind speed and direction
-Wave height
-Ocean current
-Sea surface temperature
+- Wind speed and direction.
+- Wave height.
+- Ocean current.
+- Sea surface temperature.
 
-⚠️ Concurrency Limitation:
+#### Concurrency limitation
 
-Maximum 1 concurrent request per IP
-Requests must be executed sequentially (not in parallel)
-Stormglass (Fallback)
+- Maximum **1 concurrent request per IP**.
+- Requests must be executed **sequentially**, not in parallel.
 
-Used if Open-Meteo fails.
+### Stormglass (Fallback)
 
-🧠 Risk Classification Model
+Used when Open-Meteo fails.
 
-A rule-based scoring system using environmental inputs.
+## Risk Classification Model
 
-Inputs:
+A rule-based scoring system that classifies paddleboarding risk using environmental inputs.
 
-Wind speed
-Wind direction
-Wave height
-Tidal current
+### Inputs
 
-Output Levels:
+- Wind speed
+- Wind direction
+- Wave height
+- Tidal current
 
-LOW
-MEDIUM
-HIGH
-VERY HIGH
+### Output levels
 
-Example:
+- **LOW**
+- **MEDIUM**
+- **HIGH**
+- **VERY HIGH**
 
+### Example
+
+```json
 {
-"wind_mph": 9.6,
-"wave_m": 0.3,
-"tide_flow_knots": 0.43,
-"risk": "low"
+  "wind_mph": 9.6,
+  "wave_m": 0.3,
+  "tide_flow_knots": 0.43,
+  "risk": "low"
 }
+```
 
-⚡ Caching Strategy
-In-memory cache keyed by location
-Coordinates rounded to improve cache reuse
+## Caching Strategy
 
-Example:
-cache_key = f"{round(lat, 3)}:{round(lon, 3)}"
+- In-memory cache keyed by location.
+- Coordinates are rounded to improve cache reuse.
 
-Configuration:
-CACHE_TTL_SECONDS = 300
+### Example
+
+```python
+cache_key = f"{lat, 3}:{lon, 3}"
+```
+
+### Configuration
+
+```python
+CACHE_TTL_SECONDS = 600
 MAX_AGE_MINUTES = 15
+```
 
-🔁 Fallback Logic
+## Fallback Logic
 
-If all providers fail:
+If all providers fail, the API returns the last known valid dataset.
 
-Returns last known valid dataset
-
+```json
 {
-"fallback": true,
-"fresh": false
+  "fallback": true,
+  "fresh": false
 }
+```
 
-⚠️ Limitations
-Designed for research purposes only
-Not suitable for real-world safety decisions
+## Limitations
 
-Does not account for:
+This system is designed for research purposes only and is **not suitable for real-world safety decisions**.
 
-user skill level
-equipment quality
-sudden environmental changes
-📚 Research Context
+It does not account for:
 
-Risk Classification Web Application for Paddleboarding – Usability Study
+- User skill level.
+- Equipment quality.
+- Sudden environmental changes.
 
-Focus:
+## Research Context
 
-simplifying environmental data
-supporting beginner decision-making
-evaluating usability (not safety accuracy)
-🛠️ Tech Stack
-FastAPI
-httpx (async HTTP client)
-Python 3
+**Risk Classification Web Application for Paddleboarding – Usability Study**
 
-External APIs:
+### Focus
 
-Open-Meteo
-Stormglass
-UKHO Tidal API
-🔧 Future Improvements
-Integrate tide state into risk scoring
-Add cold water risk factor
-User-specific risk calibration
-Persistent caching (e.g. Redis)
-Internal rate limiting protection
-👨‍💻 Author
+- Simplifying environmental data.
+- Supporting beginner decision-making.
+- Evaluating usability rather than safety accuracy.
 
-Thomas Bowden
+## Tech Stack
+
+- FastAPI
+- httpx (async HTTP client)
+- Python 3
+
+### External APIs
+
+- Open-Meteo
+- Stormglass
+- UKHO Tidal API
+
+## Future Improvements
+
+- Integrate tide state into risk scoring.
+- Add a cold water risk factor.
+- Support user-specific risk calibration.
+- Add persistent caching, such as Redis.
+- Add internal rate limiting protection.
+
+## Author
+
+**Thomas Bowden**  
 Swansea University – Computer Science
 
-📌 Notes
+## Notes
 
-To comply with Open-Meteo’s concurrency constraints, external API requests are executed sequentially to prevent rate limiting and ensure reliability.
+To comply with Open-Meteo’s concurrency constraints, external API requests are executed sequentially to prevent rate limiting and improve reliability.
