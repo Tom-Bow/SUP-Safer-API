@@ -2,6 +2,13 @@
 
 A backend service that retrieves real-time environmental conditions and classifies paddleboarding risk using a rule-based model.
 
+This project is part of the dissertation:
+
+**“Development of a Non-Compensatory Risk Classification System for Paddleboarding at Swansea Beach”**
+
+_Repository 1 of 2._
+Click [here](https://github.com/Tom-Bow/SUP-Safer-UI) for next repository
+
 ## Overview
 
 SUP Safer API aggregates weather and marine data to generate a simplified paddleboarding risk classification, from **LOW** to **VERY HIGH**.
