@@ -26,12 +26,20 @@ It is designed for:
 - Internet connection for external API calls
 
 ### Install
-- pip install -r requirements.txt
-- npm install
+```bash
+pip install -r requirements.txt
+```
+```bash 
+npm install
+```
 
 ### Run
-- uvicorn main:app --reload
-- npm run dev
+```bash 
+uvicorn main:app --reload
+```
+```bash 
+npm run dev
+```
 
 ### Notes
 - The frontend expects the backend to run on ...
