@@ -416,38 +416,75 @@ async def risk_from_weather(lat: float, lon: float):
 #     return output
 
 
-@app.get(
-    "/ping",
-    summary="External source health check",
-    description="Returns a simple response to confirm the API is running and that primary data source is reachable",
-    tags=["System"]    
-)
+# @app.get(
+#     "/ping",
+#     summary="External source health check",
+#     description="Returns a simple response to confirm the API is running and that primary data source is reachable",
+#     tags=["System"]    
+# )
+# async def ping_external_api():
+#     """
+#     Check if Open-Meteo (Weather and Marine) is reachable.
+#     """
+#     try:
+#         async with httpx.AsyncClient(timeout=5) as client:
+#             w = await client.get(
+#                 "https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0"
+#             )
+#             m = await client.get(
+#                 "https://marine-api.open-meteo.com/v1/marine?latitude=0&longitude=0"
+#             )
+
+#         return {
+#             "status": "ok" if w.status_code == 200 and m.status_code == 200 else "warning",
+#             "open_meteo_weather": (
+#                 "reachable" if w.status_code == 200 else f"status {w.status_code}"
+#             ),
+#             "open_meteo_marine": (
+#                 "reachable" if m.status_code == 200 else f"status {m.status_code}"
+#             )
+#         }
+
+#     except Exception as e:
+#         return {
+#             "status": "error",
+#             "message": str(e)
+#         }
+
+@app.get("/ping")
 async def ping_external_api():
-    """
-    Check if Open-Meteo (Weather and Marine) is reachable.
-    """
-    try:
-        async with httpx.AsyncClient(timeout=5) as client:
-            w = await client.get(
-                "https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0"
-            )
-            m = await client.get(
-                "https://marine-api.open-meteo.com/v1/marine?latitude=0&longitude=0"
-            )
+    async with httpx.AsyncClient(timeout=5) as client:
 
-        return {
-            "status": "ok" if w.status_code == 200 and m.status_code == 200 else "warning",
-            "open_meteo_weather": (
-                "reachable" if w.status_code == 200 else f"status {w.status_code}"
-            ),
-            "open_meteo_marine": (
-                "reachable" if m.status_code == 200 else f"status {m.status_code}"
-            )
-        }
+        weather_url = (
+            "https://api.open-meteo.com/v1/forecast"
+            "?latitude=51.609"
+            "&longitude=-3.98"
+            "&current=wind_speed_10m,wind_direction_10m"
+            "&wind_speed_unit=mph"
+        )
 
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e)
-        }
+        marine_url = (
+            "https://marine-api.open-meteo.com/v1/marine"
+            "?latitude=51.609"
+            "&longitude=-3.98"
+            "&current=wind_wave_height,ocean_current_velocity,sea_surface_temperature"
+            "&minutely_15=sea_level_height_msl"
+            "&forecast_minutely_15=96"
+        )
+
+        w = await client.get(weather_url)
+        m = await client.get(marine_url)
+
+    return {
+        "weather": {
+            "status": w.status_code,
+            "body": w.text,
+            "headers": dict(w.headers),
+        },
+        "marine": {
+            "status": m.status_code,
+            "body": m.text,
+            "headers": dict(m.headers),
+        },
+    }
 
