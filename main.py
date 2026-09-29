@@ -488,3 +488,10 @@ async def ping_external_api():
         },
     }
 
+@app.get("/ip")
+async def get_outbound_ip():
+    async with httpx.AsyncClient(timeout=5) as client:
+        response = await client.get("https://api.ipify.org?format=json")
+        response.raise_for_status()
+        return response.json()
+
